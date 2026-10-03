@@ -1,0 +1,23 @@
+Fehler gezielt beheben
+
+Untersuche und behebe den folgenden Fehler: [Fehlerbeschreibung oder beobachtetes Verhalten]
+
+Vorgehen
+
+1. Lies die relevanten Projektdateien und vorhandene Dokumentation.
+2. Ermittle den tatsächlichen Auslöser anhand des Codes und der verfügbaren Fehlermeldung.
+3. Beschreibe kurz Ursache und geplante, eng begrenzte Änderung.
+4. Behebe die Ursache mit möglichst kleiner Änderung. Bewahre bestehende Schnittstellen und Funktionalität, soweit sie nicht Teil des Fehlers sind.
+5. Ergänze oder passe einen gezielten Test an, wenn eine vorhandene Teststruktur dafür vorgesehen ist.
+6. Prüfe die Änderung mit den verfügbaren, passenden Projektprüfungen. Führe keine unnötigen Tests aus.
+
+Regeln
+
+* Keine Ursache, Anforderung oder Projektkonvention erfinden.
+* Keine sachfremden Refactorings oder Formatierungsänderungen vornehmen.
+* Vorhandene ungespeicherte Änderungen nicht überschreiben.
+* Wenn der Fehler nicht eindeutig reproduzierbar oder lokalisierbar ist, nenne die offene Frage und setze keine spekulative Reparatur um.
+
+Ergebnis
+
+Fasse Ursache, geänderte Dateien, Verhaltensänderung und tatsächlich ausgeführte Prüfungen knapp zusammen. Nenne verbleibende Unsicherheiten.

@@ -1,0 +1,23 @@
+Verhaltenserhaltendes Refactoring
+
+Auftrag: Verbessere die Lesbarkeit oder Wartbarkeit von [Bereich / Datei / Funktion], ohne das beobachtbare Verhalten zu ändern.
+
+Vorgehen
+
+1. Untersuche den betroffenen Code, seine Aufrufer, Schnittstellen und vorhandene Tests.
+2. Benenne konkret, welches Wartbarkeitsproblem das Refactoring lösen soll.
+3. Teile die Änderung in kleine, nachvollziehbare Schritte.
+4. Refaktoriere nur den vereinbarten Bereich und erhalte öffentliche Schnittstellen, Fehlerverhalten und Seiteneffekte.
+5. Ergänze keine neue Funktionalität und entferne keine vorhandene Funktionalität.
+6. Nutze vorhandene Prüfungen, um das bisherige Verhalten abzusichern.
+
+Regeln
+
+* Keine Architekturänderung ohne konkreten Nutzen für den Auftrag.
+* Keine neuen Abhängigkeiten einführen, sofern nicht erforderlich und begründet.
+* Bestehende lokale Änderungen erhalten.
+* Wenn das Ziel mit dem vorhandenen Verhalten kollidiert, halte an der betroffenen Stelle an und erkläre den Konflikt.
+
+Ergebnis
+
+Nenne das gelöste Wartbarkeitsproblem, die wichtigsten Änderungen und die tatsächlich ausgeführten Prüfungen. Weise auf nicht überprüfte Verhaltensaspekte hin.

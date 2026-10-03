@@ -1,0 +1,29 @@
+Anforderung verstehen und umsetzen
+
+Anforderung
+
+[Anforderung hier einfügen]
+
+Arbeitsweise
+
+1. Finde die betroffenen Funktionen, Datenflüsse, Schnittstellen und Konventionen im Projekt.
+2. Zerlege die Anforderung in überprüfbare Ergebnisse und nenne relevante Randfälle.
+3. Prüfe, ob die Anforderung mit bestehendem Verhalten oder vorhandenen Schnittstellen kollidiert.
+4. Setze nur die beschriebene Funktionalität um und passe vorhandene Tests oder Dokumentation an, sofern sie dadurch betroffen sind.
+5. Prüfe die Änderung mit passenden vorhandenen Projektmitteln und berichte genau, was ausgeführt wurde.
+
+Regeln
+
+* Leite Details aus dem Projekt ab, statt APIs, Datenmodelle oder Nutzerverhalten zu erfinden.
+* Bei einer blockierenden Mehrdeutigkeit: stelle eine kurze konkrete Rückfrage, bevor du den betroffenen Teil umsetzt. Arbeite unabhängig davon mögliche Teile weiter.
+* Halte die Änderung so klein wie möglich, ohne die Anforderung unvollständig umzusetzen.
+* Keine sachfremden Änderungen und keine neuen Abhängigkeiten ohne Notwendigkeit.
+
+Abnahmepunkte
+
+* [Überprüfbares Ergebnis]
+* [Randfall oder Fehlverhalten]
+
+Ergebnis
+
+Fasse Umsetzung, betroffene Dateien, erfüllte Abnahmepunkte und tatsächlich ausgeführte Prüfungen zusammen. Liste offene Punkte auf.

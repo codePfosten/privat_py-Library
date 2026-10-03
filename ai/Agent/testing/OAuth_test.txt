@@ -1,0 +1,446 @@
+Ich arbeite an einem Python-Projekt mit einer OAuth-basierten Authentifizierungslogik. Die Anwendung verwaltet Access Tokens, Refresh Tokens und weitere Authentifizierungsdaten und erneuert Tokens bei Bedarf.
+
+Deine Aufgabe ist es, die bestehende Testlogik zu untersuchen und Testfälle für die OAuth-, Token- und Fehlerbehandlung zu erstellen bzw. zu erweitern.
+
+Wichtiges Ziel
+
+Es soll nicht die komplette Anwendung getestet werden. Der Fokus liegt zunächst ausschließlich auf:
+
+1. OAuth-Aufrufen
+2. Access-Token-Logik
+3. Refresh-Token-Logik
+4. Speicherung bzw. Aktualisierung der Token-Daten
+5. Erkennen ungültiger oder abgelaufener Tokens
+6. Verhalten bei fehlenden Authentifizierungsdaten
+7. HTTP-/HTTPS-Fehlerbehandlung
+8. Verhalten nach fehlgeschlagenen Requests
+9. korrektem Weiterreichen bzw. Behandeln von Fehlerzuständen
+
+Es geht primär darum zu überprüfen:
+
+Erkennt die Anwendung den jeweiligen Zustand korrekt, führt sie die richtige Aktion aus und behandelt sie das Ergebnis bzw. den Fehler korrekt?
+
+Eine 100-%-Codeabdeckung ist ausdrücklich nicht erforderlich. Häufige und wichtige Fehlerfälle sollen aber unbedingt abgedeckt werden.
+
+⸻
+
+Sehr wichtige Vorgabe: Alle Tests offline
+
+Durch die Tests darf kein echter Request an einen externen Server gesendet werden.
+
+Alle HTTP-/HTTPS-Aufrufe müssen innerhalb der Tests gemockt bzw. simuliert werden.
+
+Insbesondere müssen auch Antworten des Token-Refresh-Endpunkts vorgegeben werden.
+
+Ein Refresh darf nicht wirklich durchgeführt werden. Stattdessen muss der Test eine vorher definierte Antwort simulieren:
+
+* HTTP 200 → erfolgreicher Refresh
+* HTTP 400 → ungültige Refresh-Anfrage oder ungültiger Refresh Token
+* HTTP 401 → nicht autorisiert
+* HTTP 403 → Zugriff verweigert
+* HTTP 404 → Endpunkt nicht gefunden, falls für die Implementierung relevant
+* HTTP 429 → zu viele Anfragen
+* HTTP 500 → interner Serverfehler
+* HTTP 502/503/504 → temporärer Server- oder Gateway-Fehler
+* Timeout bzw. Connection Error
+* ungültige oder unerwartete Response-Daten
+* ungültiges JSON bzw. fehlende erwartete Felder
+
+Welche dieser Fälle tatsächlich sinnvoll sind, soll anhand der bestehenden Implementierung entschieden werden.
+
+⸻
+
+Fehlerfälle dynamisch aus der Implementierung ableiten
+
+Bitte nicht blind eine feste Liste von HTTP-Statuscodes testen.
+
+Untersuche zuerst, wie die aktuelle Anwendung HTTP-Fehler tatsächlich behandelt.
+
+Beispielsweise:
+
+* Werden HTTP-Statuscodes direkt ausgewertet?
+* Wird raise_for_status() verwendet?
+* Werden bestimmte Exceptions abgefangen?
+* Wird bei HTTP 401 automatisch ein Refresh versucht?
+* Wird bei HTTP 400 anders reagiert als bei HTTP 500?
+* Wird ein Fehler zurückgegeben oder weitergereicht?
+* Wird bei einem fehlgeschlagenen Refresh eine erneute Autorisierung ausgelöst?
+* Wird ein ungültiger Token aus der lokalen Speicherung entfernt?
+* Wird bei einem Serverfehler erneut versucht?
+* Gibt es überhaupt eine spezielle Behandlung für bestimmte Statuscodes?
+
+Die Tests sollen die tatsächliche Logik des Projekts überprüfen und keine hypothetische OAuth-Implementierung testen.
+
+Wenn die Anwendung beispielsweise HTTP 401 und HTTP 500 unterschiedlich behandelt, sollen daraus unterschiedliche Testfälle entstehen.
+
+Wenn mehrere HTTP-Fehler aktuell identisch behandelt werden, reicht zunächst ein sinnvoller repräsentativer Testfall. Es muss nicht jeder theoretisch mögliche Statuscode einen eigenen Test bekommen.
+
+⸻
+
+Bestehende Testlogik verwenden
+
+Falls bereits Tests vorhanden sind:
+
+Nicht unnötig die bestehende Teststruktur komplett neu schreiben.
+
+Untersuche zuerst:
+
+* Welche Tests existieren bereits?
+* Welche Test-Hilfsfunktionen gibt es?
+* Wie werden Requests aktuell gemockt?
+* Wie werden Token-Daten simuliert?
+* Welche Assertions existieren bereits?
+* Welche Daten werden bisher ausgewertet?
+* Welche wichtigen Fehlerfälle fehlen?
+
+Wenn die vorhandene Teststruktur grundsätzlich geeignet ist, soll sie erweitert werden.
+
+Dabei sollen insbesondere die Assertions verbessert werden, wenn momentan nur geprüft wird, ob irgendein Ergebnis zurückkommt.
+
+Beispielsweise ist:
+
+assert result is not None
+
+oft zu wenig.
+
+Wenn anhand der Implementierung überprüfbar ist, dass beispielsweise nach einem erfolgreichen Refresh:
+
+* ein neuer Access Token vorhanden ist,
+* das Ablaufdatum aktualisiert wurde,
+* der Refresh Token erhalten bleibt bzw. aktualisiert wird,
+* der richtige nächste API-Aufruf erfolgt,
+* oder ein bestimmter Fehlerzustand zurückgegeben wird,
+
+dann sollen diese Daten auch tatsächlich geprüft werden.
+
+⸻
+
+Falls neue Tests notwendig sind
+
+Wenn noch keine sinnvolle Teststruktur vorhanden ist, erstelle eine möglichst einfache und leicht verständliche Teststruktur.
+
+Die Tests sollen bewusst nicht unnötig komplex oder abstrakt sein.
+
+Verwende einfache Namen wie beispielsweise:
+
+test_valid_token
+test_expired_token
+test_refresh_success
+test_refresh_invalid_token
+test_refresh_unauthorized
+test_refresh_server_error
+test_missing_refresh_token
+test_invalid_response
+
+Die Benennung soll direkt erkennen lassen, welcher Zustand getestet wird.
+
+Die Teststruktur soll so einfach sein, dass beim Durchlesen schnell erkennbar ist:
+
+1. welcher Zustand simuliert wird,
+2. welcher Request simuliert wird,
+3. welche Antwort zurückkommt,
+4. welche Funktion aufgerufen wird,
+5. was anschließend erwartet wird.
+
+⸻
+
+Token-Zustände testen
+
+Die Tests sollen insbesondere verschiedene Zustände der gespeicherten Authentifizierungsdaten abdecken.
+
+Beispielsweise:
+
+Normaler Zustand
+
+Access Token vorhanden
+Refresh Token vorhanden
+Token noch gültig
+
+Erwartung:
+
+Kein unnötiger Refresh
+
+Access Token abgelaufen
+
+Access Token vorhanden
+Access Token abgelaufen
+Refresh Token vorhanden
+
+Erwartung:
+
+Refresh wird durchgeführt
+neuer Access Token wird verarbeitet oder gespeichert
+
+Access Token fehlt
+
+Access Token nicht vorhanden
+Refresh Token vorhanden
+
+Prüfen, wie die bestehende Implementierung diesen Zustand behandelt.
+
+Refresh Token fehlt
+
+Access Token ungültig oder abgelaufen
+kein Refresh Token vorhanden
+
+Prüfen, ob die Anwendung beispielsweise eine erneute Autorisierung benötigt oder einen definierten Fehler zurückgibt.
+
+Ungültige Token-Daten
+
+Beispielsweise:
+
+expires_at fehlt
+expires_at ist ungültig
+Token-Feld ist leer
+Token-Daten haben einen unerwarteten Datentyp
+
+Nur Fälle testen, die für die vorhandene Implementierung relevant sind.
+
+⸻
+
+Refresh-Response vollständig kontrollieren
+
+Die Rückgabe eines Refresh Requests muss im Test immer vorher definiert sein.
+
+Beispiel:
+
+{
+    "access_token": "new_access_token",
+    "expires_in": 3600,
+    "refresh_token": "new_refresh_token"
+}
+
+Falls die Anwendung eine andere Response-Struktur erwartet, muss genau diese Struktur verwendet werden.
+
+Damit soll überprüft werden können, ob die Anwendung die Response korrekt verarbeitet.
+
+Besonders wichtig:
+
+Erfolgreicher Refresh
+
+Prüfen:
+
+* Wird der neue Access Token übernommen?
+* Wird das Ablaufdatum korrekt verarbeitet?
+* Wird ein eventuell neuer Refresh Token übernommen?
+* Werden alte Daten korrekt ersetzt?
+* Werden andere benötigte Authentifizierungsdaten erhalten?
+
+Fehlgeschlagener Refresh
+
+Prüfen:
+
+* Wird der Fehler korrekt erkannt?
+* Wird kein scheinbar gültiger neuer Token gespeichert?
+* Bleiben alte Daten nur dann erhalten, wenn das laut Implementierung sinnvoll ist?
+* Wird der Fehler korrekt weitergegeben oder behandelt?
+* Wird gegebenenfalls eine erneute Autorisierung ausgelöst?
+
+⸻
+
+Keine echten Tokens notwendig
+
+Die Tests sollen keine echten Tokens benötigen.
+
+Verwende einfache, eindeutig erkennbare Dummy-Werte:
+
+"old_access_token"
+"new_access_token"
+"valid_refresh_token"
+"invalid_refresh_token"
+
+Dadurch soll anhand des Tests sofort erkennbar sein, welcher Token vor und nach einem Vorgang erwartet wird.
+
+⸻
+
+HTTP-Requests mocken
+
+Alle externen Requests müssen so simuliert werden, dass vollständig kontrolliert werden kann:
+
+Request
+    ↓
+Mock
+    ↓
+vorher definierte Response
+    ↓
+Anwendung
+    ↓
+Assertion
+
+Beispielsweise soll ein Test explizit vorgeben können:
+
+POST /token
+→ HTTP 200
+→ {
+     access_token: "new_access_token",
+     expires_in: 3600
+   }
+
+oder:
+
+POST /token
+→ HTTP 400
+→ {
+     error: "invalid_grant"
+   }
+
+Es darf dabei keine Netzwerkverbindung notwendig sein.
+
+⸻
+
+Wichtige Assertions
+
+Die Tests sollen möglichst nicht nur den finalen Rückgabewert prüfen.
+
+Wenn die Implementierung es ermöglicht, sollen auch Zwischenzustände überprüft werden.
+
+Zum Beispiel:
+
+* Wurde überhaupt ein Refresh aufgerufen?
+* Wurde bei einem gültigen Token kein Refresh aufgerufen?
+* Wurde bei einem abgelaufenen Token ein Refresh aufgerufen?
+* Wie oft wurde der Refresh aufgerufen?
+* Wurde der richtige Token verwendet?
+* Wurde ein neuer Access Token gespeichert?
+* Wurde ein neuer Refresh Token gespeichert?
+* Wurde das Ablaufdatum aktualisiert?
+* Wurde bei einem Fehler kein falscher Token gespeichert?
+* Wurde bei einem Fehler der erwartete Fehlerzustand erzeugt?
+* Wurde nach einem erfolgreichen Refresh der ursprüngliche API-Aufruf erneut ausgeführt, falls die Implementierung das vorsieht?
+
+Dabei bitte nur Assertions hinzufügen, die sich aus der vorhandenen Implementierung sinnvoll ableiten lassen.
+
+⸻
+
+Besonders wichtige Testfälle
+
+Priorisiere zunächst die Fälle, die in einer echten Anwendung häufig auftreten können:
+
+1. gültiger Access Token
+2. abgelaufener Access Token plus gültiger Refresh Token
+3. erfolgreicher Refresh
+4. ungültiger oder abgelaufener Refresh Token
+5. fehlender Refresh Token
+6. fehlender Access Token
+7. HTTP 401
+8. HTTP 400 beim Refresh
+9. Serverfehler beim Refresh
+10. Timeout oder Connection Error
+11. ungültige oder unvollständige Refresh-Response
+
+Danach können weitere relevante Fälle ergänzt werden.
+
+Es ist ausdrücklich nicht notwendig, jeden denkbaren theoretischen Fehler abzudecken.
+
+⸻
+
+Test-Isolation
+
+Die Tests dürfen nicht versehentlich voneinander abhängig sein.
+
+Wenn eine gemeinsame Testdatei oder ein gemeinsamer Mock-Zustand verwendet wird, muss vor jedem relevanten Test ein definierter Ausgangszustand hergestellt werden.
+
+Ein Test darf beispielsweise nicht nur funktionieren, weil ein vorheriger Test zufällig einen Token gespeichert hat.
+
+Wenn die bestehende Architektur bewusst einen sequenziellen Testablauf benötigt, darf dieser als solcher implementiert werden. In diesem Fall muss aber klar erkennbar sein, dass die Reihenfolge absichtlich relevant ist.
+
+⸻
+
+Was nicht getestet werden soll
+
+Vorerst nicht unnötig testen:
+
+* anwendungsspezifische Fachlogik
+* komplexe Ressourcenoperationen
+* Benutzeroberflächen
+* vollständige End-to-End-Kommunikation mit externen Diensten
+* tatsächliche OAuth-Autorisierung im Browser
+* Netzwerkverbindung
+* externe Server selbst
+* Performance
+* 100-%-Codeabdeckung
+
+Der Schwerpunkt liegt auf:
+
+OAuth
+↓
+Token-Zustand
+↓
+HTTP-Aufruf
+↓
+Response / Exception
+↓
+Fehlerbehandlung
+↓
+Token-Aktualisierung
+
+⸻
+
+Vorgehensweise
+
+Arbeite bitte in dieser Reihenfolge:
+
+1. Bestehenden Code analysieren
+
+Identifiziere:
+
+* OAuth-Funktionen
+* Token-Speicherung
+* Token-Validierung
+* Refresh-Logik
+* HTTP-Client
+* Fehlerbehandlung
+* bestehende Tests
+* vorhandene Test-Mocks
+
+2. Bestehende Tests bewerten
+
+Zeige kurz auf:
+
+* welche wichtigen Fälle bereits getestet werden,
+* welche Fälle fehlen,
+* welche Assertions zu schwach sind.
+
+3. Testfälle definieren
+
+Erstelle eine überschaubare Liste konkreter Testfälle.
+
+Für jeden Testfall:
+
+Ausgangszustand
+→ Mock-Request
+→ Mock-Response
+→ erwartetes Verhalten
+→ relevante Assertions
+
+4. Tests implementieren
+
+Bestehende Tests erweitern, wenn möglich.
+
+Neue Tests nur dort erstellen, wo sie benötigt werden.
+
+5. Tests vollständig offline halten
+
+Überprüfe insbesondere, dass kein Test versehentlich einen echten HTTP-/HTTPS-Request ausführt.
+
+6. Ergebnis erklären
+
+Gib nach der Implementierung kurz an:
+
+* welche Testfälle hinzugefügt oder geändert wurden,
+* welche Token-Zustände geprüft werden,
+* welche HTTP-Fehler simuliert werden,
+* welche wichtigen Assertions vorhanden sind,
+* ob irgendwo bewusst keine Prüfung vorgenommen wurde, weil die bestehende Implementierung dafür keine definierte Logik besitzt.
+
+Wichtig
+
+Bitte keine Funktionen oder erwartetes Verhalten erfinden, die im vorhandenen Projekt nicht existieren.
+
+Wenn die bestehende Implementierung einen bestimmten Fehler momentan nicht speziell behandelt, soll der Test nicht einfach eine gewünschte neue Funktion voraussetzen. Stattdessen soll der Test das tatsächlich vorhandene Verhalten dokumentieren bzw. sichtbar machen.
+
+Das Ziel ist nicht, die Anwendung durch die Tests umzubauen, sondern zunächst zuverlässig festzustellen:
+
+Funktioniert die vorhandene OAuth-, Token- und Fehlerlogik so, wie sie aktuell implementiert ist?
+
+Die Tests sollen dabei möglichst einfach, lesbar und nachvollziehbar bleiben.
