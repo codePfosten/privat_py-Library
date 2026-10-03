@@ -1,0 +1,109 @@
+Gehe das gesamte Projekt durch und passe den Code so an, dass er zuverlässig für automatisierte Abläufe und unbeaufsichtigte Ausführungen geeignet ist. Die Lösung soll unabhängig davon funktionieren, ob es sich beispielsweise um eine API-, Datei-, Datenbank-, Netzwerk-, Hintergrund-, Batch- oder sonstige Automatisierung handelt.
+
+Behalte die bestehende Funktionalität und Struktur soweit sinnvoll bei und ändere die eigentliche Programmlogik nicht unnötig.
+
+Dabei gelten folgende Regeln:
+
+* Keine print()-Ausgaben im produktiven Code.
+* Keine unkontrollierten raise-Exceptions, die eine automatisierte Ausführung unnötig abbrechen.
+* Erwartbare Fehler und normale Sonderfälle sollen kontrolliert behandelt werden.
+* Für unerwartete oder nicht kontrollierte Fehler soll eine zentrale log()-Möglichkeit verwendet werden.
+* log() soll ausreichend Informationen speichern, damit ein Fehler später nachvollzogen und behoben werden kann.
+* Die Anwendung soll keine interaktiven Eingaben voraussetzen, wenn diese für den automatisierten Ablauf nicht erforderlich sind.
+* Rückgabewerte, Statusinformationen oder Fehlerzustände sollen für die aufrufende Automatisierung eindeutig und maschinenlesbar sein.
+
+Ein unerwarteter Fehler soll nach Möglichkeit mindestens enthalten:
+
+* Zeitpunkt
+* betroffene Funktion, Komponente oder Stelle
+* Fehlertyp
+* vollständige Fehlermeldung
+* relevante Eingaben bzw. Parameter, soweit unkritisch
+* aktuellen Programmzustand, soweit relevant
+* vollständigen Traceback
+* bei HTTP-, API-, Datei-, Datenbank- oder Netzwerkfehlern zusätzlich die relevanten technischen Informationen, beispielsweise Statuscode, Endpoint, Dateipfad, Operation oder Response-Informationen
+
+Auf keinen Fall dürfen sensible oder vertrauliche Daten in Logs geschrieben werden. Dazu gehören insbesondere:
+
+* Passwörter
+* Access Tokens
+* Refresh Tokens
+* API-Keys
+* Secrets
+* private Schlüssel
+* Session-Cookies
+* Authentifizierungsdaten
+* personenbezogene Daten, sofern sie für die Fehleranalyse nicht zwingend erforderlich sind
+* sonstige vertrauliche Inhalte aus Requests, Responses, Dateien oder Datenbanken
+
+Prüfe vor dem Schreiben eines Log-Eintrags, ob enthaltene Werte sensible Daten enthalten könnten. Solche Werte müssen entfernt, maskiert oder durch neutrale Platzhalter ersetzt werden. Im Zweifel darf ein Wert nicht geloggt werden.
+
+Die Anwendung soll nach einem erwartbaren Fehler möglichst kontrolliert weiterarbeiten oder einen definierten Fehlerzustand zurückgeben. Bei einem unerwarteten Fehler soll der Fehler protokolliert werden und die aufrufende Logik einen kontrollierten, eindeutig erkennbaren Fehlerzustand erhalten, statt dass eine Exception unkontrolliert die gesamte Automatisierung beendet.
+
+Untersuche zuerst die vorhandene Projektstruktur und passe die Lösung an die bereits verwendeten Klassen, Funktionen, Schnittstellen und Rückgabewerte an. Erfinde keine unnötige neue Architektur und führe keine Änderungen ein, die für die Automatisierung nicht erforderlich sind.
+
+Achte außerdem darauf, dass:
+
+* Fehler nicht stillschweigend ignoriert werden,
+* Log-Einträge nicht selbst weitere unbehandelte Fehler verursachen,
+* wiederholbare Abläufe möglichst idempotent bleiben,
+* Ressourcen wie Dateien, Verbindungen oder Sessions korrekt geschlossen werden,
+* Zeitüberschreitungen und externe Abhängigkeiten kontrolliert behandelt werden,
+* die bestehende Funktionalität weiterhin normal funktioniert.
+
+Zusätzliche Sicherheitsanalyse
+
+Analysiere bei der Durchsicht des gesamten Projekts außerdem die vorhandene Datensicherheit und identifiziere erkennbare Sicherheits- oder Datenschutzschwachstellen.
+
+Wichtig:
+
+* Führe dabei ausschließlich eine Analyse durch.
+* Verändere, behebe oder refaktoriere die gefundenen Sicherheitsprobleme nicht.
+* Die bestehende Funktionalität und der Code sollen aufgrund dieser Analyse nicht angepasst werden.
+* Weise nur auf Schwachstellen hin, die anhand des vorhandenen Codes nachvollziehbar sind.
+* Keine unbegründeten Vermutungen als tatsächliche Schwachstellen darstellen.
+
+Prüfe insbesondere, soweit im Projekt relevant:
+
+* Speicherung und Verarbeitung von Passwörtern, Tokens, API-Keys und Secrets
+* Umgang mit Logs und versehentlich protokollierten vertraulichen Daten
+* unverschlüsselte Speicherung oder Übertragung
+* fehlende TLS-/Zertifikatsprüfung
+* unsichere Datei- und Pfadverarbeitung
+* fehlende Eingabevalidierung
+* Injection-Risiken
+* unsichere Datenbankabfragen
+* fehlende Zugriffskontrollen
+* zu weit gefasste Berechtigungen
+* unsichere temporäre Dateien
+* ungeschützte Konfigurationsdateien
+* Umgang mit personenbezogenen Daten
+* fehlende Timeouts bei externen Verbindungen
+* unsichere Fehlerausgaben
+* veraltete oder riskante Abhängigkeiten, sofern aus dem Projekt erkennbar
+* mögliche Replay-, Session- oder Token-Risiken
+* fehlende Maskierung sensibler Daten
+
+Gib jede gefundene Schwachstelle kurz und übersichtlich aus, beispielsweise in diesem Format:
+
+Schwachstelle: [kurze Bezeichnung]
+Fundstelle: [Datei, Klasse, Funktion oder möglichst genaue Stelle]
+Warum problematisch: [kurze Erklärung des Risikos]
+
+Falls keine eindeutige Schwachstelle gefunden wird, gib ausdrücklich an:
+
+Keine eindeutige Sicherheits- oder Datenschutzschwachstelle anhand des geprüften Codes festgestellt.
+
+Trenne die reine Sicherheitsanalyse klar von den tatsächlich vorgenommenen Änderungen. Sicherheitsprobleme dürfen in diesem Arbeitsschritt nur dokumentiert, nicht behoben werden.
+
+Am Ende kurz auflisten:
+
+1. welche Stellen für die Automatisierung angepasst wurden,
+2. welche Fehler jetzt kontrolliert behandelt werden,
+3. welche unerwarteten Fehler geloggt werden,
+4. wie sensible Daten aus Logs ausgeschlossen oder maskiert werden,
+5. wie ein Fehler an die aufrufende Funktion oder Automatisierung zurückgegeben wird,
+6. welche Sicherheits- oder Datenschutzschwachstellen gefunden wurden,
+7. wo sich diese Schwachstellen befinden und warum sie problematisch sind.
+
+Wichtig: Das Projekt soll danach weiterhin normal funktionieren. Bestehende Fach-, OAuth-, Token-, API-, Datei-, Datenbank- oder sonstige Programmlogik darf nicht unnötig verändert werden. Die Sicherheitsanalyse ist ausschließlich dokumentarisch und darf keine automatischen Sicherheitsänderungen am Projekt auslösen.
